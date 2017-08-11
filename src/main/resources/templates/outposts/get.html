@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout :: head"></head>
+<body>
+
+	<div class="container">
+		<div>
+			<a href="/outposts">Back</a>
+			<a th:href="@{/outposts/{id}/stock(id=${outpost.outpostId})}">Manage Stock</a>
+		</div>
+		<h1 th:text=${outpost.name}></h1>
+
+		<table>
+			<tr>
+				<th>Item</th>
+				<th>Quantity</th>
+			</tr>
+			<tr th:each="stock : ${outpost.stock}">
+				<td th:text="${stock.itemName}"></td>
+				<td th:text="${stock.quantity}"></td>
+			</tr>
+		</table>
+	</div>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout :: head"></head>
+<body>
+	<div class="container">
+
+		<div th:replace="navigation :: navigation"></div>
+
+		<div>
+			<a href="/outposts/new">Add Outpost</a>
+		</div>
+
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Outpost</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="outpost : ${outposts}">
+					<td><a th:href="@{/outposts/{id}(id=${outpost.outpostId})}" th:text="${outpost.name}"></a></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</body>
+</html>
