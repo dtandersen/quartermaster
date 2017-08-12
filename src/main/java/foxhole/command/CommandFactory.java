@@ -41,4 +41,19 @@ public class CommandFactory
 	{
 		return new UpdateStock(outpostRepository);
 	}
+
+	public ListItems listItems()
+	{
+		return new ListItems(itemRepository);
+	}
+
+	public UpdateStockItem updateStockItem()
+	{
+		return new UpdateStockItem(outpostRepository);
+	}
+
+	public DeleteOutpost deleteOutpost()
+	{
+		return new DeleteOutpost(outpostRepository);
+	}
 }

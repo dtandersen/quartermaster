@@ -4,8 +4,7 @@
 <body>
 	<div class="container">
 		<div>
-			<a href="/outposts">Back</a>
-			<a th:href="@{/outposts/{id}/stock(id=${outpost.outpostId})}">Manage Stock</a>
+			<a href="/outposts">Back</a> <a th:href="@{/outposts/{id}/stock(id=${outpost.outpostId})}">Manage Stock</a>
 		</div>
 		<h1 th:text=${outpost.name}></h1>
 
@@ -15,16 +14,177 @@
 				<th>Min</th>
 				<th>Stock</th>
 				<th>Deficit</th>
-				<th>Deficit<br/>(stacks)</th>
+				<th>Deficit<br />(stacks)
+				</th>
+				<th>Shipping<br />(stacks)
+				</th>
+				<th>Projected</th>
 			</tr>
-			<tr th:each="stock : ${outpost.stock}">
-				<td th:text="${stock.itemName}"></td>
-				<td th:text="${stock.minQuantity}"></td>
-				<td th:text="${stock.quantity}"></td>
-				<td th:text="${stock.deficit > 0 ? stock.deficit : '-'}"></td>
-				<td th:text="${stock.deficitStacks > 0 ? stock.deficitStacks : '-'}"></td>
-			</tr>
+			<tbody data-bind="foreach: outpost.stock">
+				<tr data-bind="css: { improving: projected() >= minQuantity() && !(quantity() >= minQuantity()), good: quantity() >= minQuantity(), bad: projected() < minQuantity()}">
+					<td data-bind="text: itemName"></td>
+					<td data-bind="text: minQuantity"></td>
+					<td><input data-bind="value: quantity" size="2" />
+						<button data-bind="click : $parent.transferToHq">&gt;</button></td>
+					<td data-bind="text: deficit"></td>
+					<td data-bind="text: deficitStacks"></td>
+					<td><button data-bind="click : $parent.transferToOutpost">&lt;&lt;</button>
+						<button data-bind="click : $parent.transferOneToOutpost">&lt;</button> <input data-bind="value: shipping" size="2" />
+						<button data-bind="click : $parent.decrementShipping">-</button> <button data-bind="click : $parent.incrementShipping">+</button></td>
+					<td data-bind="text: projected"></td>
+				</tr>
+			</tbody>
 		</table>
 	</div>
+
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		var model = {
+				//find: function(id) { return "x"; }
+			    //transferToHq: function(stock) {
+			   // 	alert(JSON.stringify(stock));
+			   // 	stock.shipping(stock.shipping()+1);
+			    //},
+			    //transferToOutpost: function(stock) {
+			    //	
+			    //}
+
+		}
+		$.when(
+			$.ajax({
+				url : '/api/outposts/' + /*[[${outpost.outpostId}]]*/,
+				success: function(outpost) {
+					model.outpost=outpost;
+				}
+			}),
+			$.ajax({
+				url : '/api/items/',
+				success:  function(items) { 
+					model.items={};
+					items.forEach (function (e) {
+						model.items[e.itemId] = e;
+				 	});
+				}
+			})	
+		)
+		.done(		
+			function (results) {
+				var myChildModel = function(parent, data) {
+					//var data = options.data;
+					//var parent = options.parent;
+				    ko.mapping.fromJS(data, {}, this);
+				    //alert(JSON.stringify(options.parent));
+			    	var self = this;
+				     
+				    this.projected = ko.computed(function() {
+				        return this.quantity() + this.shipping() * this.item.pack();
+				    }, this);
+				    this.itemName = ko.computed(function() {
+				        return this.item.name();
+				    }, this);
+				    this.deficit = ko.computed(function() {
+				        return this.minQuantity() - this.quantity();
+				    }, this);
+				    this.deficitStacks = ko.computed(function() {
+				    	var self = this;
+				    	//var stackSize  = parent.items.find(function(d) { return d.itemId == self.itemId}).pack;
+				    	//var stackSize  = viewModel.find(this.itemId()).pack;
+				    	//alert(parent);
+				    	var stackSize = this.item.pack();
+				    	//var stackSize  =20;
+				        return Math.ceil((this.minQuantity() - this.quantity()) / stackSize);
+				    }, this);
+
+				    this.quantity.subscribe(function(value) { 
+				    	client.updateStock({
+				    		itemId: self.itemId(),
+				    		quantity: self.quantity(),
+				    		shipping: self.shipping()
+				    	});
+				    });
+
+				    this.shipping.subscribe(function(value) { 
+				    	client.updateStock({
+				    		itemId: self.itemId(),
+				    		quantity: self.quantity(),
+				    		shipping: self.shipping()
+				    	});
+				    });
+				};
+				
+				var Outpost = function(data) {
+				    //this.find = function(itemId) { return "x"; }
+				    this.transferToHq = function(stock) {
+				    	//alert(JSON.stringify(stock));
+				    	if (stock.quantity() >= stock.item.pack()) {
+				    		stock.shipping(stock.shipping()+1);
+				    		stock.quantity(stock.quantity() - stock.item.pack());
+				    	}
+				    }
+				    this.transferToOutpost = function(stock) {
+				    	if (stock.shipping() >= 0) {
+				    		var val = stock.shipping(); 
+				    		stock.shipping(0);
+				    		stock.quantity(stock.quantity() + val * stock.item.pack());
+				    	}
+				    }
+				    this.transferOneToOutpost = function(stock) {
+				    	if (stock.shipping() >= 0) {
+				    		stock.shipping(stock.shipping() - 1);
+				    		stock.quantity(stock.quantity() + stock.item.pack());
+				    	}
+				    }
+				    this.decrementShipping = function(stock) {
+				    	if (stock.shipping() > 0) {
+				    		stock.shipping(stock.shipping() - 1);
+				    	}
+				    }
+				    this.incrementShipping = function(stock) {
+			    		stock.shipping(stock.shipping() + 1);
+				    }
+				    ko.mapping.fromJS(data, mapping, this);
+				    
+				}
+				
+				var mapping = {
+				        create: function(options) {
+				        	var parent = new Outpost(options.data); 
+				            return parent;
+				        }
+
+						  ,
+						  'stock': {
+					        create: function(options) {
+					            return new myChildModel(options.parent, options.data);
+					        }
+					    }
+					};
+				
+				model.outpost.stock.forEach(function (stock) {
+					stock.item = model.items[stock.itemId];
+			 	});
+				
+				//alert(JSON.stringify(model.outpost.stock));
+				var outpostId = /*[[${outpost.outpostId}]]*/;
+				var client = {
+					updateStock: function(data) {
+						var url = '/api/outposts/' + outpostId + '/stock/' + data.itemId;
+						$.ajax({
+							url : url,
+							method: 'POST',
+							data: data,
+							success: function(outpost) {
+							}
+						})
+					}
+				}
+
+				//alert(JSON.stringify(model.outpost.stock));
+				var viewModel = ko.mapping.fromJS(model, mapping);
+				ko.applyBindings(viewModel);
+				
+			});
+		/*]]>*/
+	</script>
 </body>
 </html>

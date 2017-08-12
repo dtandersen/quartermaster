@@ -1,4 +1,4 @@
-package foxhole;
+package foxhole.controller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
-import foxhole.OutpostController.DescribeOutpostResultImplementation;
 import foxhole.command.CommandFactory;
 import foxhole.command.DescribeOutpost;
 import foxhole.command.DescribeOutpost.DescribeOutpostRequest;
 import foxhole.command.UpdateStock;
 import foxhole.command.UpdateStock.StockUpdate;
 import foxhole.command.UpdateStock.UpdateStockRequest;
+import foxhole.controller.OutpostController.DescribeOutpostResultImplementation;
 
 @Controller
 public class StockController

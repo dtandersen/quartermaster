@@ -93,5 +93,10 @@ public class OutpostModel
 		{
 			return stock.getQuantity();
 		}
+
+		public int getShipping()
+		{
+			return stock.getShipping();
+		}
 	}
 }

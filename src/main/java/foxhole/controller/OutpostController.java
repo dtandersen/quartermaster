@@ -1,6 +1,7 @@
-package foxhole;
+package foxhole.controller;
 
 import java.util.List;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,8 @@ import org.springframework.web.servlet.ModelAndView;
 import foxhole.command.CommandFactory;
 import foxhole.command.CreateOutpost;
 import foxhole.command.CreateOutpost.CreateOutpostRequest;
+import foxhole.command.DeleteOutpost;
+import foxhole.command.DeleteOutpost.DeleteOutpostRequest;
 import foxhole.command.DescribeOutpost;
 import foxhole.command.DescribeOutpost.DescribeOutpostRequest;
 import foxhole.command.DescribeOutpost.DescribeOutpostResult;
@@ -68,6 +71,22 @@ public class OutpostController
 	{
 		final CreateOutpost command = commandFactory.createOutpost();
 		command.setRequest(form);
+		command.execute();
+
+		return "redirect:/outposts";
+	}
+
+	@PostMapping("/outposts/{outpostId}/delete")
+	public String delete(@PathVariable("outpostId") final String outpostId)
+	{
+		final DeleteOutpost command = commandFactory.deleteOutpost();
+		command.setRequest(new DeleteOutpostRequest() {
+			@Override
+			public UUID getOutpostId()
+			{
+				return UUID.fromString(outpostId);
+			}
+		});
 		command.execute();
 
 		return "redirect:/outposts";

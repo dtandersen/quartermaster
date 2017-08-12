@@ -103,20 +103,22 @@ public class JdbcOutpostRepository implements OutpostRepository
 				"  insert into outpost_item (" +
 				"    outpost_id," +
 				"    item_id," +
-				"    stock" +
+				"    stock," +
+				"    shipping" +
 				"  ) VALUES (" +
 				"    :outpostId," +
 				"    :itemId," +
-				"    :quantity" +
+				"    :quantity," +
+				"    :shipping" +
 				"  )";
 
 		for (final Stock stock : outpost.getStock().values())
 		{
-			// updateStock2(outpost.getOutpostId(), stock);
 			final Map<String, Object> paramMap = new HashMap<>();
 			paramMap.put("outpostId", outpost.getOutpostId());
 			paramMap.put("itemId", stock.getItemId());
 			paramMap.put("quantity", stock.getQuantity());
+			paramMap.put("shipping", stock.getShipping());
 
 			jdbcTemplate.update(sql, paramMap);
 		}
@@ -127,7 +129,9 @@ public class JdbcOutpostRepository implements OutpostRepository
 	{
 		final String sql = "" +
 				"  update outpost_item " +
-				"  set stock = :quantity" +
+				"  set" +
+				"    stock = :quantity," +
+				"    shipping = :shipping" +
 				"  where outpost_id = :outpostId" +
 				"    AND item_id = :itemId";
 
@@ -135,6 +139,7 @@ public class JdbcOutpostRepository implements OutpostRepository
 		paramMap.put("outpostId", outpostId);
 		paramMap.put("itemId", stock.getItemId());
 		paramMap.put("quantity", stock.getQuantity());
+		paramMap.put("shipping", stock.getShipping());
 
 		jdbcTemplate.update(sql, paramMap);
 	}
@@ -147,7 +152,26 @@ public class JdbcOutpostRepository implements OutpostRepository
 			return StockBuilder.stock()
 					.withItemId(UUID.fromString(rs.getString("item_id")))
 					.withQuantity(rs.getInt("stock"))
+					.withShipping(rs.getInt("shipping"))
 					.build();
 		}
+	}
+
+	@Override
+	public void delete(final UUID outpostId)
+	{
+		final Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("outpostId", outpostId);
+
+		final String sql2 = "" +
+				"  delete from outpost_item" +
+				"  where outpost_id = :outpostId";
+		jdbcTemplate.update(sql2, paramMap);
+
+		final String sql = "" +
+				"  delete from outpost" +
+				"  where outpost_id = :outpostId";
+		jdbcTemplate.update(sql, paramMap);
+
 	}
 }

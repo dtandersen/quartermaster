@@ -50,7 +50,7 @@ public class Outpost
 
 		private String name;
 
-		private Map<UUID, Stock> stock;
+		private Map<UUID, Stock> stock = new HashMap<>();
 
 		public static OutpostBuilder outpost()
 		{

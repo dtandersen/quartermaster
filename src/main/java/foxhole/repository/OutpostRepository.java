@@ -16,4 +16,6 @@ public interface OutpostRepository
 	void createStock(Outpost outpost);
 
 	void updateStock(UUID outpostId, Stock stock);
+
+	void delete(UUID outpostId);
 }

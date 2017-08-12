@@ -18,7 +18,10 @@
 			</thead>
 			<tbody>
 				<tr th:each="outpost : ${outposts}">
-					<td><a th:href="@{/outposts/{id}(id=${outpost.outpostId})}" th:text="${outpost.name}"></a></td>
+					<td><a th:href="@{/outposts/{id}(id=${outpost.outpostId})}" th:text="${outpost.name}"></a>
+						<form th:action="@{/outposts/{id}/delete(id=${outpost.outpostId})}" method="post">
+							<input type="submit" value="X" style="float: right">
+						</form></td>
 				</tr>
 			</tbody>
 		</table>

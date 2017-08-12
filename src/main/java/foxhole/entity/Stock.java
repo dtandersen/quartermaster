@@ -8,16 +8,13 @@ public class Stock
 
 	private final int quantity;
 
-	public Stock(final Item item, final int quantity)
-	{
-		this.itemId = item.getItemId();
-		this.quantity = quantity;
-	}
+	private final int shipping;
 
 	public Stock(final StockBuilder stockBuilder)
 	{
 		this.itemId = stockBuilder.itemId;
 		this.quantity = stockBuilder.quantity;
+		this.shipping = stockBuilder.shipping;
 	}
 
 	public UUID getItemId()
@@ -30,11 +27,18 @@ public class Stock
 		return quantity;
 	}
 
+	public int getShipping()
+	{
+		return shipping;
+	}
+
 	public static class StockBuilder
 	{
 		private UUID itemId;
 
 		private int quantity;
+
+		private int shipping;
 
 		public static StockBuilder stock()
 		{
@@ -56,6 +60,12 @@ public class Stock
 		public Stock build()
 		{
 			return new Stock(this);
+		}
+
+		public StockBuilder withShipping(final int shipping)
+		{
+			this.shipping = shipping;
+			return this;
 		}
 	}
 }
