@@ -73,7 +73,7 @@ public class OutpostController
 		return "redirect:/outposts";
 	}
 
-	private final class DescribeOutpostResultImplementation implements DescribeOutpostResult
+	public static class DescribeOutpostResultImplementation implements DescribeOutpostResult
 	{
 		private OutpostModel outpost;
 

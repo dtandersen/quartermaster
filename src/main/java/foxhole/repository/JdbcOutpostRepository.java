@@ -97,7 +97,7 @@ public class JdbcOutpostRepository implements OutpostRepository
 	}
 
 	@Override
-	public void updateStock(final Outpost outpost)
+	public void createStock(final Outpost outpost)
 	{
 		final String sql = "" +
 				"  insert into outpost_item (" +
@@ -112,6 +112,7 @@ public class JdbcOutpostRepository implements OutpostRepository
 
 		for (final Stock stock : outpost.getStock().values())
 		{
+			// updateStock2(outpost.getOutpostId(), stock);
 			final Map<String, Object> paramMap = new HashMap<>();
 			paramMap.put("outpostId", outpost.getOutpostId());
 			paramMap.put("itemId", stock.getItemId());
@@ -119,6 +120,23 @@ public class JdbcOutpostRepository implements OutpostRepository
 
 			jdbcTemplate.update(sql, paramMap);
 		}
+	}
+
+	@Override
+	public void updateStock(final UUID outpostId, final Stock stock)
+	{
+		final String sql = "" +
+				"  update outpost_item " +
+				"  set stock = :quantity" +
+				"  where outpost_id = :outpostId" +
+				"    AND item_id = :itemId";
+
+		final Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("outpostId", outpostId);
+		paramMap.put("itemId", stock.getItemId());
+		paramMap.put("quantity", stock.getQuantity());
+
+		jdbcTemplate.update(sql, paramMap);
 	}
 
 	static class StockMapper implements RowMapper<Stock>

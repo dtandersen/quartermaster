@@ -47,7 +47,7 @@ public class OutpostModel
 				.collect(Collectors.toList());
 	}
 
-	static class StockModel
+	public static class StockModel
 	{
 		private final Stock stock;
 
@@ -62,6 +62,26 @@ public class OutpostModel
 		int getSortOrder()
 		{
 			return item.getSortOrder();
+		}
+
+		public int getDeficit()
+		{
+			return item.getMinQty() - stock.getQuantity();
+		}
+
+		public int getDeficitStacks()
+		{
+			return (int)Math.ceil((float)getDeficit() / (float)item.getPack());
+		}
+
+		public int getMinQuantity()
+		{
+			return item.getMinQty();
+		}
+
+		public String getItemId()
+		{
+			return item.getItemId().toString();
 		}
 
 		public String getItemName()

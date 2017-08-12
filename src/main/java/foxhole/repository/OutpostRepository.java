@@ -3,6 +3,7 @@ package foxhole.repository;
 import java.util.List;
 import java.util.UUID;
 import foxhole.entity.Outpost;
+import foxhole.entity.Stock;
 
 public interface OutpostRepository
 {
@@ -12,5 +13,7 @@ public interface OutpostRepository
 
 	Outpost find(UUID outpostId);
 
-	void updateStock(Outpost outpost);
+	void createStock(Outpost outpost);
+
+	void updateStock(UUID outpostId, Stock stock);
 }

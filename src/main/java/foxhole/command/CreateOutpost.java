@@ -37,7 +37,7 @@ public class CreateOutpost extends BaseCommand<CreateOutpostRequest, VoidResult>
 		final List<Item> items = itemRepository.all();
 		items.forEach(item -> outpost.updateStock(item, 0));
 
-		outpostRepository.updateStock(outpost);
+		outpostRepository.createStock(outpost);
 	}
 
 	public static interface CreateOutpostRequest

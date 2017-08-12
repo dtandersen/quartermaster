@@ -2,7 +2,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="layout :: head"></head>
 <body>
-
 	<div class="container">
 		<div>
 			<a href="/outposts">Back</a>
@@ -10,14 +9,20 @@
 		</div>
 		<h1 th:text=${outpost.name}></h1>
 
-		<table>
+		<table class="table table-bordered">
 			<tr>
 				<th>Item</th>
-				<th>Quantity</th>
+				<th>Min</th>
+				<th>Stock</th>
+				<th>Deficit</th>
+				<th>Deficit<br/>(stacks)</th>
 			</tr>
 			<tr th:each="stock : ${outpost.stock}">
 				<td th:text="${stock.itemName}"></td>
+				<td th:text="${stock.minQuantity}"></td>
 				<td th:text="${stock.quantity}"></td>
+				<td th:text="${stock.deficit > 0 ? stock.deficit : '-'}"></td>
+				<td th:text="${stock.deficitStacks > 0 ? stock.deficitStacks : '-'}"></td>
 			</tr>
 		</table>
 	</div>

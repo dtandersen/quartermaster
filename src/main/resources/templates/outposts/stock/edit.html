@@ -7,21 +7,25 @@
 		<div th:replace="navigation :: navigation"></div>
 
 		<div>
-			<a href="/outposts/new">Add Outpost</a>
+			<a th:href="@{/outposts/{id}(id=${outpost.outpostId})}">Back</a>
 		</div>
 
-		<table class="table">
-			<thead>
+		<h1 th:text=${outpost.name}></h1>
+
+		<form th:action="@{/outposts/{id}/stock(id=${outpost.outpostId})}" method="post">
+			<table>
 				<tr>
-					<th>Outpost</th>
+					<th>Item</th>
+					<th>Quantity</th>
 				</tr>
-			</thead>
-			<tbody>
-				<tr th:each="outpost : ${outposts}">
-					<td><a th:href="@{/outposts/{id}(id=${outpost.outpostId})}" th:text="${outpost.name}"></a></td>
+				<tr th:each="stock : ${outpost.stock}">
+					<td th:text="${stock.itemName}"></td>
+					<td><input type="hidden" name="itemId" th:value="${stock.itemId}" />
+						<input type="text" name="quantity" th:value="${stock.quantity}"></td>
 				</tr>
-			</tbody>
-		</table>
+			</table>
+			<input type="submit" value="Save" />
+		</form>
 	</div>
 </body>
 </html>
