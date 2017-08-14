@@ -1,30 +1,43 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout :: head"></head>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout2}">
+<head>
+<title>Outposts</title>
+</head>
 <body>
-	<div class="container">
-
+	<div layout:fragment="navigation">
 		<div th:replace="navigation :: navigation"></div>
 
-		<div>
-			<a href="/outposts/new">Add Outpost</a>
+	</div>
+
+	<div layout:fragment="content">
+		<header th:insert="breadcrumb :: bb(~{ :: .breadcrumb})">
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a href="/outposts">Home</a></li>
+				<li class="breadcrumb-item"><a href="/outposts">Outposts</a></li>
+			</ol>
+		</header>
+
+		<div class="btn-group" role="group">
+			<a href="/outposts/new" class="btn btn-link" role="button">Add Outpost</a>
 		</div>
 
-		<table class="table">
-			<thead>
-				<tr>
-					<th>Outpost</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr th:each="outpost : ${outposts}">
-					<td><a th:href="@{/outposts/{id}(id=${outpost.outpostId})}" th:text="${outpost.name}"></a>
-						<form th:action="@{/outposts/{id}/delete(id=${outpost.outpostId})}" method="post">
-							<input type="submit" value="X" style="float: right">
-						</form></td>
-				</tr>
-			</tbody>
-		</table>
+		<div>
+			<table class="table table-bordered">
+				<thead>
+					<tr>
+						<th>Outpost</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="outpost : ${outposts}">
+						<td><a th:href="@{/outposts/{id}(id=${outpost.outpostId})}" th:text="${outpost.name}"></a>
+							<form class="form-inline" style="float: right" th:action="@{/outposts/{id}/delete(id=${outpost.outpostId})}" method="post">
+								<button type="submit" class="btn btn-link">Delete</button>
+							</form></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 	</div>
 </body>
 </html>

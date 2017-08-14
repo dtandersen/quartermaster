@@ -1,0 +1,9 @@
+<html>
+<body>
+	<div th:fragment="bb (breadcrumb)">
+		<ol class="breadcrumb" th:replace="${breadcrumb}">
+			<li class="breadcrumb-item" th:text="${breadcrumb}">Homezz</li>
+		</ol>
+	</div>
+</body>
+</html>
