@@ -54,7 +54,13 @@ public class Outpost
 
 		public static OutpostBuilder outpost()
 		{
-			return new OutpostBuilder();
+			return new OutpostBuilder().withRandomOutpostId();
+		}
+
+		private OutpostBuilder withRandomOutpostId()
+		{
+			outpostId = UUID.randomUUID();
+			return this;
 		}
 
 		public OutpostBuilder withId(final String outpostId)
