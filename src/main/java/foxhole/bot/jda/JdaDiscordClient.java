@@ -46,8 +46,9 @@ public class JdaDiscordClient implements DiscordClient
 	}
 
 	@Override
-	public void sendMessage(final String message)
+	public void sendMessage(final String message, final String snowflakeId)
 	{
+		jda.getTextChannelById(snowflakeId).sendMessage(message).queue();
 	}
 
 	private static class JdaEventListenerAdapter extends ListenerAdapter
@@ -62,7 +63,8 @@ public class JdaDiscordClient implements DiscordClient
 		@Override
 		public void onMessageReceived(final MessageReceivedEvent event)
 		{
-			listener.onMessageReceived(event.getMessage().getContent());
+			// event.getChannel().getId();
+			listener.onMessageReceived(event.getMessage().getContent(), event.getChannel().getId());
 		}
 	}
 }

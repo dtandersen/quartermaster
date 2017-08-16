@@ -56,4 +56,9 @@ public class CommandFactory
 	{
 		return new DeleteOutpost(outpostRepository);
 	}
+
+	public ItemInventoryAtOutpost inventory()
+	{
+		return new ItemInventoryAtOutpost(outpostRepository, itemRepository);
+	}
 }

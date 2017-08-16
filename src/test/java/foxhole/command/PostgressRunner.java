@@ -1,6 +1,5 @@
 package foxhole.command;
 
-import java.io.File;
 import java.io.IOException;
 import com.opentable.db.postgres.embedded.EmbeddedPostgres;
 
@@ -12,8 +11,9 @@ public class PostgressRunner
 	{
 		pg = EmbeddedPostgres
 				.builder()
-				.setCleanDataDirectory(false)
-				.setDataDirectory(new File("C:\\Users\\dta001\\AppData\\Local\\Temp\\embedded-pg\\foxhole"))
+				.setCleanDataDirectory(true)
+				.setPort(9997)
+				// .setDataDirectory(new File(System.getProperty("java.io.tmpdir") + "\\embedded-pg\\foxhole"))
 				.start();
 	}
 

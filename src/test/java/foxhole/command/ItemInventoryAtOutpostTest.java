@@ -12,6 +12,7 @@ import foxhole.TestEnvironment;
 import foxhole.TestFacade;
 import foxhole.command.ItemInventoryAtOutpost.ItemInventoryAtOutpostRequest;
 import foxhole.command.ItemInventoryAtOutpost.ItemInventoryAtOutpostResult;
+import foxhole.command.model.OutpostModel.StockModel;
 import foxhole.entity.Stock;
 import foxhole.entity.Stock.StockBuilder;
 import foxhole.util.ComposeBuilder;
@@ -99,28 +100,29 @@ public class ItemInventoryAtOutpostTest
 		assertThat(stock(), nullValue());
 	}
 
-	private Matcher<Stock> matches(final String... testData) throws IOException
+	private Matcher<StockModel> matches(final String... testData) throws IOException
 	{
-		final Matcher<Stock> matchers = MarkdownStream.of(testData)
-				.map(row -> x(row))
-				.map(stockBuilder -> stockBuilder.build())
+		final Matcher<StockModel> matchers = MarkdownStream.of(testData)
+				.map(row -> rowToStockModel(row))
+				// .map(stockBuilder -> stockBuilder.build())
 				.map(stock -> stockMatcher(stock))
 				.findFirst().get();
 
 		return matchers;
 	}
 
-	private Matcher<Stock> stockMatcher(final Stock stock)
+	private Matcher<StockModel> stockMatcher(final StockModel stock)
 	{
-		return ComposeBuilder.compose(Stock.class)
-				.withFeature("outpostId", Stock::getOutpostId, stock.getOutpostId())
-				.withFeature("itemId", Stock::getItemId, stock.getItemId())
-				.withFeature("quantity", Stock::getQuantity, stock.getQuantity())
-				.withFeature("shipping", Stock::getShipping, stock.getShipping())
+		return ComposeBuilder.compose(StockModel.class)
+				.withFeature("outpostName", StockModel::getOutpostName, stock.getOutpostName())
+				.withFeature("outpostName", StockModel::getItemName, stock.getItemName())
+				// .withFeature("itemId", StockModel::getItemId, stock.getItemId())
+				.withFeature("quantity", StockModel::getQuantity, stock.getQuantity())
+				// .withFeature("shipping", StockModel::getShipping, stock.getShipping())
 				.build();
 	}
 
-	private Stock stock()
+	private StockModel stock()
 	{
 		return result.stock();
 	}
@@ -128,16 +130,28 @@ public class ItemInventoryAtOutpostTest
 	private void givenInventory(final String... testData) throws IOException
 	{
 		MarkdownStream.of(testData)
-				.map(row -> x(row))
+				.map(row -> StockBuilder.stock()
+						.withOutpostId(testFacade.outpostIdOf(row.trimmed("outpost")))
+						.withItemId(testFacade.itemIdOf(row.trimmed("item")))
+						.withQuantity(row.asInteger("quantity")))
 				.forEach(stockBuilder -> testFacade.createStock(stockBuilder));
 	}
 
-	private StockBuilder x(final Row row)
+	private StockModel rowToStockModel(final Row row)
 	{
-		return StockBuilder.stock()
+		return new StockModel(StockBuilder.stock()
 				.withOutpostId(testFacade.outpostIdOf(row.trimmed("outpost")))
 				.withItemId(testFacade.itemIdOf(row.trimmed("item")))
-				.withQuantity(row.asInteger("quantity"));
+				.withQuantity(row.asInteger("quantity"))
+				.build(),
+				testFacade.itemByName(row.trimmed("item")),
+				testFacade.outpostByName(row.trimmed("outpost"))
+
+		);
+		// return StockBuilder.stock()
+		// .withOutpostId(testFacade.outpostIdOf(row.trimmed("outpost")))
+		// .withItemId(testFacade.itemIdOf(row.trimmed("item")))
+		// .withQuantity(row.asInteger("quantity"));
 	}
 
 	private void whenItemInventoryRequested(final String itemName, final String outpostName)
@@ -164,15 +178,15 @@ public class ItemInventoryAtOutpostTest
 
 	private final class ItemInventoryAtOutpostResultImplementation implements ItemInventoryAtOutpostResult
 	{
-		private Stock stock;
+		private StockModel stock;
 
-		public Stock stock()
+		public StockModel stock()
 		{
 			return stock;
 		}
 
 		@Override
-		public void setStock(final Stock stock)
+		public void setStock(final Stock stockx, final StockModel stock)
 		{
 			this.stock = stock;
 		}

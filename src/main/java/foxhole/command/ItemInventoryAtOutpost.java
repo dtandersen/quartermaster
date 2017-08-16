@@ -3,6 +3,7 @@ package foxhole.command;
 import java.util.Optional;
 import foxhole.command.ItemInventoryAtOutpost.ItemInventoryAtOutpostRequest;
 import foxhole.command.ItemInventoryAtOutpost.ItemInventoryAtOutpostResult;
+import foxhole.command.model.OutpostModel.StockModel;
 import foxhole.entity.Item;
 import foxhole.entity.Outpost;
 import foxhole.entity.Stock;
@@ -30,20 +31,24 @@ public class ItemInventoryAtOutpost extends BaseCommand<ItemInventoryAtOutpostRe
 	{
 		try
 		{
-			final Outpost outpost = outpostRepository.findByName(request.getOutpostName()).orElseThrow(() -> new NotFoundException());
-			final Item item = itemRepository.findByName(request.getItemName()).orElseThrow(() -> new NotFoundException());
+			final String outpostName = request.getOutpostName();
+			final String itemName = request.getItemName();
+			final Outpost outpost = outpostRepository.findByName(outpostName).orElseThrow(() -> new NotFoundException());
+			final Item item = itemRepository.findByName(itemName).orElseThrow(() -> new NotFoundException());
 			final Optional<Stock> stock = outpost.find(item);
 			if (stock.isPresent())
 			{
-				result.setStock(stock.get());
+				result.setStock(stock.get(), new StockModel(stock.get(), item, outpost));
 			}
 			else
 			{
-				result.setStock(StockBuilder.stock()
+				final Stock build = StockBuilder.stock()
 						.withOutpostId(outpost.getOutpostId())
 						.withItemId(item.getItemId())
 						.withQuantity(0)
-						.build());
+						.build();
+				result.setStock(build,
+						new StockModel(build, item, outpost));
 			}
 		}
 		catch (final NotFoundException e)
@@ -60,6 +65,11 @@ public class ItemInventoryAtOutpost extends BaseCommand<ItemInventoryAtOutpostRe
 
 	public interface ItemInventoryAtOutpostResult
 	{
-		void setStock(Stock stock);
+		void setStock(Stock stock, StockModel stockModel);
 	}
+
+	// static class StockModel
+	// {
+	//
+	// }
 }

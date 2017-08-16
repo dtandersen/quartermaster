@@ -17,7 +17,7 @@ public class MockDiscord implements DiscordClient
 	}
 
 	@Override
-	public void sendMessage(final String message)
+	public void sendMessage(final String message, final String snowflakeId)
 	{
 		if (started)
 		{
@@ -33,7 +33,7 @@ public class MockDiscord implements DiscordClient
 
 	public void injectMessage(final String message)
 	{
-		listener.onMessageReceived(message);
+		listener.onMessageReceived(message, null);
 	}
 
 	@Override

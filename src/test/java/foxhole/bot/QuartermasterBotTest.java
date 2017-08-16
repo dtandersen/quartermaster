@@ -1,28 +1,21 @@
-package foxhole;
+package foxhole.bot;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import java.io.IOException;
-import java.util.UUID;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import foxhole.bot.BotException;
-import foxhole.bot.MockDiscord;
-import foxhole.bot.QuartermasterBot;
+import foxhole.FlywayRunner;
+import foxhole.TestEnvironment;
+import foxhole.TestFacade;
 import foxhole.command.PostgressRunner;
-import foxhole.entity.Item;
-import foxhole.entity.Item.ItemBuilder;
-import foxhole.entity.Outpost.OutpostBuilder;
 import foxhole.entity.Stock.StockBuilder;
 import foxhole.util.MarkdownStream;
 import foxhole.util.MarkdownStream.Row;
 
 public class QuartermasterBotTest
 {
-	// @Rule
-	// public SingleInstancePostgresRule pg = EmbeddedPostgresRules.singleInstance();
-
 	private TestEnvironment env;
 
 	private TestFacade testFacade;
@@ -45,57 +38,34 @@ public class QuartermasterBotTest
 		env = new TestEnvironment(PostgressRunner.pg);
 		testFacade = new TestFacade(env);
 
-		// testFacade.runFlyway();
 		testFacade.cleanDb();
 
 		mockDiscord = new MockDiscord();
 		testFacade.givenOutpost("HQ");
+		testFacade.givenOutpost("FOB");
 		testFacade.givenItem("SMG");
 		testFacade.givenItem("Rifle");
 		givenInventory(
 				"outpost | item  | quantity",
-				"HQ      | Rifle | 10");
+				"HQ      | Rifle | 10",
+				"FOB     | SMG   | 20");
 	}
 
 	@Test
 	public void rifleInventoryAtHq() throws BotException
 	{
-		final ItemBuilder withName = ItemBuilder.item()
-				.withItemId(UUID.randomUUID())
-				.withName("Rifle");
-		final Item item = testFacade.createItem(withName);
-
-		final OutpostBuilder withStock = OutpostBuilder.outpost()
-				.withName("HQ")
-				.withStock(StockBuilder.stock()
-						.withItemId(item.getItemId())
-						.withQuantity(10));
-		testFacade.createOutpost(withStock);
-
 		processMessage("!inv rifle @ hq");
 
 		assertThat(theOutput(), is("Rifle 10"));
 	}
 
-	// @Test
-	// public void smgInventoryAtFob() throws BotException
-	// {
-	// final UUID itemId = UUID.randomUUID();
-	// itemRepository.create(ItemBuilder.item().withItemId(itemId).withName("SMG"));
-	// final Outpost outpost = OutpostBuilder.outpost()
-	// .withName("FOB")
-	// .withStock(Arrays.asList(StockBuilder.stock()
-	// .withItemId(itemId)
-	// .withQuantity(20)
-	// .build()))
-	// .build();
-	// outpostRepository.create(outpost);
-	// outpostRepository.createStock(outpost);
-	//
-	// processMessage("!inv smg @ fob");
-	//
-	// assertThat(theOutput(), is("SMG 20"));
-	// }
+	@Test
+	public void smgInventoryAtFob() throws BotException
+	{
+		processMessage("!inv smg @ fob");
+
+		assertThat(theOutput(), is("SMG 20"));
+	}
 
 	private void givenInventory(final String... testData) throws IOException
 	{
@@ -119,7 +89,7 @@ public class QuartermasterBotTest
 
 	private void processMessage(final String message) throws BotException
 	{
-		final QuartermasterBot bot = new QuartermasterBot(mockDiscord);
+		final QuartermasterBot bot = new QuartermasterBot(mockDiscord, env.commandFactory());
 		bot.start();
 		mockDiscord.injectMessage(message);
 	}

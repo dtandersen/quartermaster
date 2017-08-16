@@ -36,7 +36,7 @@ public class OutpostModel
 	public List<StockModel> getStock()
 	{
 		return outpost.getStock().values().stream()
-				.map(stock -> new StockModel(stock, items.get(stock.getItemId())))
+				.map(stock -> new StockModel(stock, items.get(stock.getItemId()), outpost))
 				.sorted(new Comparator<StockModel>() {
 					@Override
 					public int compare(final StockModel o1, final StockModel o2)
@@ -53,10 +53,13 @@ public class OutpostModel
 
 		private final Item item;
 
-		public StockModel(final Stock stock, final Item item)
+		private final Outpost outpost;
+
+		public StockModel(final Stock stock, final Item item, final Outpost outpost)
 		{
 			this.stock = stock;
 			this.item = item;
+			this.outpost = outpost;
 		}
 
 		int getSortOrder()
@@ -97,6 +100,11 @@ public class OutpostModel
 		public int getShipping()
 		{
 			return stock.getShipping();
+		}
+
+		public String getOutpostName()
+		{
+			return outpost.getName();
 		}
 	}
 }

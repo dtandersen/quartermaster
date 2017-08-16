@@ -81,4 +81,14 @@ public class TestFacade
 		itemRepository.clean();
 		outpostRepository.clean();
 	}
+
+	public Item itemByName(final String trimmed)
+	{
+		return itemRepository.findByName(trimmed).get();
+	}
+
+	public Outpost outpostByName(final String trimmed)
+	{
+		return outpostRepository.findByName(trimmed).get();
+	}
 }

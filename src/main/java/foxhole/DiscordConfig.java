@@ -6,18 +6,19 @@ import org.springframework.context.annotation.Configuration;
 import foxhole.bot.DiscordClient;
 import foxhole.bot.QuartermasterBot;
 import foxhole.bot.jda.JdaDiscordClient;
+import foxhole.command.CommandFactory;
 
 @Configuration
 public class DiscordConfig
 {
 	@Bean
-	public CommandLineRunner schedulingRunner()
+	public CommandLineRunner schedulingRunner(final CommandFactory commandFactory)
 	{
 		return new CommandLineRunner() {
 			@Override
 			public void run(final String... args) throws Exception
 			{
-				final QuartermasterBot bot = new QuartermasterBot(discordClient());
+				final QuartermasterBot bot = new QuartermasterBot(discordClient(), commandFactory);
 				bot.start();
 			}
 		};
