@@ -51,7 +51,7 @@ public class QuartermasterBot implements DiscordEventListener
 				@Override
 				public void setStock(final Stock stock, final StockModel stockModel)
 				{
-					discordClient.sendMessage(stockModel.getItemName() + " " + stock.getQuantity(), snowflakeId);
+					discordClient.sendMessage("There is " + stock.getQuantity() + " " + stockModel.getItemName() + " at " + stockModel.getOutpostName(), snowflakeId);
 				}
 			});
 			command.execute();
