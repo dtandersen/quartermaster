@@ -27,12 +27,9 @@ public class CreateOutpost extends BaseCommand<CreateOutpostRequest, VoidResult>
 	@Override
 	public void execute()
 	{
-		final Outpost outpost = OutpostBuilder.outpost()
+		final Outpost outpost = outpostRepository.create(OutpostBuilder.outpost()
 				.withId(UUID.randomUUID())
-				.withName(request.getName())
-				.build();
-
-		outpostRepository.create(outpost);
+				.withName(request.getName()));
 
 		final List<Item> items = itemRepository.all();
 		items.forEach(item -> outpost.updateStock(item, 0));

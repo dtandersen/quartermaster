@@ -5,8 +5,10 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import foxhole.entity.Outpost;
@@ -34,8 +36,36 @@ public class JdbcOutpostRepository implements OutpostRepository
 	}
 
 	@Override
-	public void create(final Outpost outpost)
+	public Optional<Outpost> findByName(final String outpostName)
 	{
+		final Map<String, Object> parameters = new HashMap<>();
+		parameters.put("outpostName", outpostName);
+
+		try
+		{
+			final OutpostBuilder outpostBuilder = jdbcTemplate
+					.queryForObject("" +
+							"  select *" +
+							"  from outpost" +
+							"  where lower(outpost_name) = lower(:outpostName)",
+							parameters,
+							new OutpostMapper());
+			final Outpost outpost = outpostBuilder.build();
+
+			outpost.setStock(stockOf(outpost.getOutpostId()));
+
+			return Optional.of(outpost);
+		}
+		catch (final EmptyResultDataAccessException e)
+		{
+			return Optional.empty();
+		}
+	}
+
+	@Override
+	public Outpost create(final OutpostBuilder outpostBuilder)
+	{
+		final Outpost outpost = outpostBuilder.build();
 		final String sql = "" +
 				"  insert into outpost" +
 				"  (" +
@@ -51,6 +81,8 @@ public class JdbcOutpostRepository implements OutpostRepository
 		parameters.put("name", outpost.getName());
 
 		jdbcTemplate.update(sql, parameters);
+
+		return outpost;
 	}
 
 	@Override
@@ -125,6 +157,33 @@ public class JdbcOutpostRepository implements OutpostRepository
 	}
 
 	@Override
+	public void createStock(final StockBuilder stockBuilder)
+	{
+		final Stock stock = stockBuilder.build();
+
+		final String sql = "" +
+				"  insert into outpost_item (" +
+				"    outpost_id," +
+				"    item_id," +
+				"    stock," +
+				"    shipping" +
+				"  ) VALUES (" +
+				"    :outpostId," +
+				"    :itemId," +
+				"    :quantity," +
+				"    :shipping" +
+				"  )";
+
+		final Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("outpostId", stock.getOutpostId());
+		paramMap.put("itemId", stock.getItemId());
+		paramMap.put("quantity", stock.getQuantity());
+		paramMap.put("shipping", stock.getShipping());
+
+		jdbcTemplate.update(sql, paramMap);
+	}
+
+	@Override
 	public void updateStock(final UUID outpostId, final Stock stock)
 	{
 		final String sql = "" +
@@ -150,6 +209,7 @@ public class JdbcOutpostRepository implements OutpostRepository
 		public Stock mapRow(final ResultSet rs, final int rowNum) throws SQLException
 		{
 			return StockBuilder.stock()
+					.withOutpostId(UUID.fromString(rs.getString("outpost_id")))
 					.withItemId(UUID.fromString(rs.getString("item_id")))
 					.withQuantity(rs.getInt("stock"))
 					.withShipping(rs.getInt("shipping"))
@@ -173,5 +233,22 @@ public class JdbcOutpostRepository implements OutpostRepository
 				"  where outpost_id = :outpostId";
 		jdbcTemplate.update(sql, paramMap);
 
+	}
+
+	@Override
+	public List<Stock> stock()
+	{
+		final String sql = "" +
+				"  select *" +
+				"  from outpost_item";
+
+		return jdbcTemplate.query(sql, new StockMapper());
+	}
+
+	@Override
+	public void clean()
+	{
+		jdbcTemplate.update("delete from outpost", new HashMap<>());
+		jdbcTemplate.update("delete from outpost_item", new HashMap<>());
 	}
 }

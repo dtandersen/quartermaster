@@ -3,6 +3,7 @@ package foxhole.entity;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import foxhole.entity.Stock.StockBuilder;
 
@@ -36,12 +37,22 @@ public class Outpost
 		return stock;
 	}
 
+	public void setStock(final List<Stock> stockOf)
+	{
+		stockOf.forEach(s -> stock.put(s.getItemId(), s));
+	}
+
 	public void updateStock(final Item item, final int quantity)
 	{
 		stock.put(item.getItemId(), StockBuilder.stock()
 				.withItemId(item.getItemId())
 				.withQuantity(quantity)
 				.build());
+	}
+
+	public Optional<Stock> find(final Item item)
+	{
+		return Optional.ofNullable(stock.get(item.getItemId()));
 	}
 
 	public static class OutpostBuilder
@@ -87,6 +98,17 @@ public class Outpost
 			for (final Stock s : stock)
 			{
 				this.stock.put(s.getItemId(), s);
+			}
+			return this;
+		}
+
+		public OutpostBuilder withStock(final StockBuilder... stockBuilders)
+		{
+			this.stock = new HashMap<>();
+			for (final StockBuilder s : stockBuilders)
+			{
+				final Stock s2 = s.build();
+				this.stock.put(s2.getItemId(), s2);
 			}
 			return this;
 		}

@@ -92,7 +92,13 @@ public class Item
 
 		public static ItemBuilder item()
 		{
-			return new ItemBuilder();
+			return new ItemBuilder().withRandomItemId();
+		}
+
+		private ItemBuilder withRandomItemId()
+		{
+			itemId = UUID.randomUUID();
+			return this;
 		}
 
 		public Item build()
