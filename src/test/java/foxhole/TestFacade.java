@@ -3,6 +3,7 @@ package foxhole;
 import java.util.List;
 import java.util.UUID;
 import javax.sql.DataSource;
+import foxhole.bot.QuartermasterEnvironment;
 import foxhole.entity.Item;
 import foxhole.entity.Item.ItemBuilder;
 import foxhole.entity.Outpost;
@@ -25,6 +26,13 @@ public class TestFacade
 		dataSource = env.dataSource();
 		itemRepository = env.itemRepository();
 		outpostRepository = env.outpostRepository();
+	}
+
+	public TestFacade(final QuartermasterEnvironment env)
+	{
+		itemRepository = env.itemRepository();
+		outpostRepository = env.outpostRepository();
+		dataSource = null;
 	}
 
 	public Outpost createOutpost(final OutpostBuilder outpostBuilder)

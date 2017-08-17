@@ -4,41 +4,25 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import java.io.IOException;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import foxhole.FlywayRunner;
-import foxhole.TestEnvironment;
 import foxhole.TestFacade;
-import foxhole.command.PostgressRunner;
 import foxhole.entity.Stock.StockBuilder;
 import foxhole.util.MarkdownStream;
 import foxhole.util.MarkdownStream.Row;
 
 public class QuartermasterBotTest
 {
-	private TestEnvironment env;
+	private QuartermasterEnvironment env;
 
 	private TestFacade testFacade;
 
 	private MockDiscord mockDiscord;
 
-	@BeforeClass
-	public static void prepDb() throws IOException
-	{
-		if (!PostgressRunner.started())
-		{
-			PostgressRunner.run();
-			FlywayRunner.runFlyway(PostgressRunner.pg.getPostgresDatabase());
-		}
-	}
-
 	@Before
 	public void setUp() throws IOException
 	{
-		env = new TestEnvironment(PostgressRunner.pg);
+		env = new InMemoryQuartermasterEnvironment();
 		testFacade = new TestFacade(env);
-
-		testFacade.cleanDb();
 
 		mockDiscord = new MockDiscord();
 		testFacade.givenOutpost("HQ");
@@ -56,7 +40,7 @@ public class QuartermasterBotTest
 	{
 		processMessage("!inv rifle @ hq");
 
-		assertThat(theOutput(), is("Rifle 10"));
+		assertThat(theOutput(), is("There is 10 Rifle at HQ"));
 	}
 
 	@Test
@@ -64,7 +48,7 @@ public class QuartermasterBotTest
 	{
 		processMessage("!inv smg @ fob");
 
-		assertThat(theOutput(), is("SMG 20"));
+		assertThat(theOutput(), is("There is 20 SMG at FOB"));
 	}
 
 	private void givenInventory(final String... testData) throws IOException

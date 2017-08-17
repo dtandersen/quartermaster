@@ -5,11 +5,10 @@ import static org.junit.Assert.assertThat;
 import java.io.IOException;
 import org.hamcrest.Matcher;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import foxhole.FlywayRunner;
-import foxhole.TestEnvironment;
 import foxhole.TestFacade;
+import foxhole.bot.InMemoryQuartermasterEnvironment;
+import foxhole.bot.QuartermasterEnvironment;
 import foxhole.command.ItemInventoryAtOutpost.ItemInventoryAtOutpostRequest;
 import foxhole.command.ItemInventoryAtOutpost.ItemInventoryAtOutpostResult;
 import foxhole.command.model.OutpostModel.StockModel;
@@ -21,30 +20,17 @@ import foxhole.util.MarkdownStream.Row;
 
 public class ItemInventoryAtOutpostTest
 {
-	private TestEnvironment env;
+	private QuartermasterEnvironment env;
 
 	private TestFacade testFacade;
 
 	private ItemInventoryAtOutpostResultImplementation result;
 
-	@BeforeClass
-	public static void prepDb() throws IOException
-	{
-		if (!PostgressRunner.started())
-		{
-			PostgressRunner.run();
-			FlywayRunner.runFlyway(PostgressRunner.pg.getPostgresDatabase());
-		}
-	}
-
 	@Before
 	public void setUp() throws IOException
 	{
-		env = new TestEnvironment(PostgressRunner.pg);
+		env = new InMemoryQuartermasterEnvironment();
 		testFacade = new TestFacade(env);
-
-		testFacade.runFlyway();
-		testFacade.cleanDb();
 
 		testFacade.givenOutpost("HQ");
 		testFacade.givenItem("SMG");
@@ -104,7 +90,6 @@ public class ItemInventoryAtOutpostTest
 	{
 		final Matcher<StockModel> matchers = MarkdownStream.of(testData)
 				.map(row -> rowToStockModel(row))
-				// .map(stockBuilder -> stockBuilder.build())
 				.map(stock -> stockMatcher(stock))
 				.findFirst().get();
 
@@ -116,9 +101,7 @@ public class ItemInventoryAtOutpostTest
 		return ComposeBuilder.compose(StockModel.class)
 				.withFeature("outpostName", StockModel::getOutpostName, stock.getOutpostName())
 				.withFeature("outpostName", StockModel::getItemName, stock.getItemName())
-				// .withFeature("itemId", StockModel::getItemId, stock.getItemId())
 				.withFeature("quantity", StockModel::getQuantity, stock.getQuantity())
-				// .withFeature("shipping", StockModel::getShipping, stock.getShipping())
 				.build();
 	}
 

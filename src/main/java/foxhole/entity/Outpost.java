@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import foxhole.command.ToStringBuilder;
 import foxhole.entity.Stock.StockBuilder;
 
 public class Outpost
@@ -53,6 +54,15 @@ public class Outpost
 	public Optional<Stock> find(final Item item)
 	{
 		return Optional.ofNullable(stock.get(item.getItemId()));
+	}
+
+	@Override
+	public String toString()
+	{
+		return new ToStringBuilder(this)
+				.withProperty("outpostId", outpostId)
+				.withProperty("name", name)
+				.toString();
 	}
 
 	public static class OutpostBuilder
@@ -117,5 +127,10 @@ public class Outpost
 		{
 			return new Outpost(this);
 		}
+	}
+
+	public void addStock(final Stock stock)
+	{
+		this.stock.put(stock.getItemId(), stock);
 	}
 }
